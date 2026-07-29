@@ -8,9 +8,31 @@ const rawPort = process.env.PORT || "5000";
 const port = Number(rawPort);
 const basePath = process.env.BASE_PATH || "/";
 
+// The admin dev server runs with base "/admin/", and Vite answers a bare "/admin"
+// with a "did you mean /admin/?" hint page instead of redirecting. In production
+// Express 301s "/admin" -> "/admin/", so redirect here too and keep the two matched.
+function adminTrailingSlashRedirect() {
+  return {
+    name: "admin-trailing-slash-redirect",
+    configureServer(server: { middlewares: { use: (fn: (req: any, res: any, next: () => void) => void) => void } }) {
+      server.middlewares.use((req, res, next) => {
+        const url: string = req.url || "";
+        if (url === "/admin" || url.startsWith("/admin?")) {
+          res.statusCode = 301;
+          res.setHeader("Location", url.replace(/^\/admin/, "/admin/"));
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
+    adminTrailingSlashRedirect(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

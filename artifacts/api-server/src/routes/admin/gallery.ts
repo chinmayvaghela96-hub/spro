@@ -19,7 +19,7 @@ router.get("/gallery", async (req, res) => {
 // Create gallery photo
 router.post("/gallery", requireAuth, async (req, res) => {
   try {
-    const { imageUrl, title, description, isActive, order } = req.body;
+    const { imageUrl, title, description, category, isActive, order } = req.body;
 
     if (!imageUrl) {
       res.status(400).json({ error: "Image URL is required" });
@@ -32,6 +32,7 @@ router.post("/gallery", requireAuth, async (req, res) => {
         imageUrl,
         title: title || "",
         description: description || "",
+        category: (category || "").trim(),
         isActive: isActive === undefined ? true : (isActive === true || isActive === "true"),
         order: order ? Number(order) : 0,
       })
@@ -62,6 +63,9 @@ router.post("/gallery/bulk", requireAuth, async (req, res) => {
       const url = typeof img === "string" ? img : img.imageUrl;
       const title = typeof img === "object" ? img.title : "";
       const description = typeof img === "object" ? img.description : "";
+      // A bulk upload is usually one event's photos, so allow a shared category
+      // either per-image or once for the whole batch.
+      const category = (typeof img === "object" ? img.category : "") || req.body.category || "";
 
       if (!url) continue;
 
@@ -71,6 +75,7 @@ router.post("/gallery/bulk", requireAuth, async (req, res) => {
           imageUrl: url,
           title: title || "",
           description: description || "",
+          category: String(category).trim(),
           order: nextOrder++,
           isActive: true,
         })
@@ -90,7 +95,7 @@ router.post("/gallery/bulk", requireAuth, async (req, res) => {
 router.put("/gallery/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { imageUrl, title, description, isActive, order } = req.body;
+    const { imageUrl, title, description, category, isActive, order } = req.body;
 
     const [updated] = await db
       .update(galleryPhotos)
@@ -98,8 +103,9 @@ router.put("/gallery/:id", requireAuth, async (req, res) => {
         imageUrl,
         title,
         description,
+        category: typeof category === "string" ? category.trim() : category,
         isActive: isActive === true || isActive === "true",
-        order: order ? Number(order) : 0,
+        order: order === undefined || order === null || order === "" ? 0 : Number(order),
         updatedAt: new Date().toISOString(),
       })
       .where(eq(galleryPhotos.id, Number(id)))

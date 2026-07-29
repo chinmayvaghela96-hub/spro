@@ -1,7 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { cn } from "../lib/utils";
-import { Sun, Moon, LogOut, Menu, User, Lock, UserCircle } from "lucide-react";
+import { Sun, Moon, LogOut, Menu, User, Lock } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 
@@ -80,14 +80,6 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                 <p className="text-sm font-semibold text-[var(--color-text)]">{admin?.name}</p>
                 <p className="text-xs text-[var(--color-text-muted)]">{admin?.email}</p>
               </div>
-              <Link
-                href="/admin/sir-info"
-                onClick={() => setProfileOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)] no-underline transition-colors"
-              >
-                <UserCircle className="w-4 h-4" />
-                Sir Information
-              </Link>
               <Link
                 href="/admin/change-password"
                 onClick={() => setProfileOpen(false)}

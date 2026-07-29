@@ -24,8 +24,10 @@ import Services from "./pages/Services";
 import Industries from "./pages/Industries";
 import Software from "./pages/Software";
 import Training from "./pages/Training";
+import TrainingPrograms from "./pages/TrainingPrograms";
 import Gallery from "./pages/Gallery";
-import SirInformation from "./pages/SirInformation";
+import FacultyAdvisors from "./pages/FacultyAdvisors";
+import Backup from "./pages/Backup";
 import Careers from "./pages/Careers";
 
 
@@ -69,17 +71,20 @@ export default function App() {
       <Route path="/admin/training">
         <ProtectedRoute><Training /></ProtectedRoute>
       </Route>
+      <Route path="/admin/training-programs">
+        <ProtectedRoute><TrainingPrograms /></ProtectedRoute>
+      </Route>
       <Route path="/admin/careers">
         <ProtectedRoute><Careers /></ProtectedRoute>
-      </Route>
-      <Route path="/admin/sir-info">
-        <ProtectedRoute><SirInformation /></ProtectedRoute>
       </Route>
       <Route path="/admin/page-banners">
         <ProtectedRoute><PageBanners /></ProtectedRoute>
       </Route>
       <Route path="/admin/gallery">
         <ProtectedRoute><Gallery /></ProtectedRoute>
+      </Route>
+      <Route path="/admin/faculty-advisors">
+        <ProtectedRoute><FacultyAdvisors /></ProtectedRoute>
       </Route>
       <Route path="/admin/nav-items">
         <ProtectedRoute><NavItems /></ProtectedRoute>
@@ -116,6 +121,9 @@ export default function App() {
       </Route>
       <Route path="/admin/settings">
         <ProtectedRoute><SettingsPage /></ProtectedRoute>
+      </Route>
+      <Route path="/admin/backup">
+        <ProtectedRoute><Backup /></ProtectedRoute>
       </Route>
       <Route path="/admin/change-password">
         <ProtectedRoute><ChangePassword /></ProtectedRoute>

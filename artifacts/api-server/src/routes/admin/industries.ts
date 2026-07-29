@@ -44,6 +44,33 @@ router.post("/industries", requireAuth, async (req, res) => {
   }
 });
 
+// Reorder industries
+// NOTE: must be registered before "/industries/:id" or Express matches this as id="reorder".
+router.put("/industries/reorder", requireAuth, async (req, res) => {
+  try {
+    const { items } = req.body; // Array of { id: number, order: number }
+
+    if (!items || !Array.isArray(items)) {
+      res.status(400).json({ error: "Items array is required" });
+      return;
+    }
+
+    await db.transaction(async (tx) => {
+      for (const item of items) {
+        await tx
+          .update(industries)
+          .set({ order: Number(item.order), updatedAt: new Date().toISOString() })
+          .where(eq(industries.id, Number(item.id)));
+      }
+    });
+
+    res.json({ success: true, message: "Industries reordered successfully" });
+  } catch (error) {
+    req.log.error(error, "Reorder industries error");
+    res.status(500).json({ error: "Internal server error reordering industries" });
+  }
+});
+
 // Update industry
 router.put("/industries/:id", requireAuth, async (req, res) => {
   try {
@@ -57,7 +84,7 @@ router.put("/industries/:id", requireAuth, async (req, res) => {
         description,
         icon,
         link,
-        order: order ? Number(order) : 0,
+        order: order === undefined || order === null || order === "" ? 0 : Number(order),
         updatedAt: new Date().toISOString(),
       })
       .where(eq(industries.id, Number(id)))
@@ -72,32 +99,6 @@ router.put("/industries/:id", requireAuth, async (req, res) => {
   } catch (error) {
     req.log.error(error, "Update industry error");
     res.status(500).json({ error: "Internal server error updating industry" });
-  }
-});
-
-// Reorder industries
-router.put("/industries/reorder", requireAuth, async (req, res) => {
-  try {
-    const { items } = req.body; // Array of { id: number, order: number }
-
-    if (!items || !Array.isArray(items)) {
-      res.status(400).json({ error: "Items array is required" });
-      return;
-    }
-
-    await db.transaction(async (tx) => {
-      for (const item of items) {
-        await tx
-          .update(industries)
-          .set({ order: item.order, updatedAt: new Date().toISOString() })
-          .where(eq(industries.id, item.id));
-      }
-    });
-
-    res.json({ success: true, message: "Industries reordered successfully" });
-  } catch (error) {
-    req.log.error(error, "Reorder industries error");
-    res.status(500).json({ error: "Internal server error reordering industries" });
   }
 });
 

@@ -6,5 +6,4 @@ export * from "./media";
 export * from "./messages";
 export * from "./settings";
 export * from "./pages";
-export * from "./profile";
 export * from "./careers";

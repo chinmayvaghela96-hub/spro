@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import * as Icons from "lucide-react";
-import { Play, X, ArrowRight, ExternalLink, BookOpen, FileText, Download, ExternalLinkIcon, Mail, Phone, MapPin, CheckCircle, Briefcase } from "lucide-react";
+import { Play, X, ArrowRight, ExternalLink, BookOpen, FileText, Download, ExternalLinkIcon, Mail, Phone, MapPin, CheckCircle, Briefcase, Clock, CalendarDays, UserCheck, MonitorPlay } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageBanner } from "../components/layout/PageBanner";
 import { HeroSlider } from "../components/layout/HeroSlider";
@@ -551,24 +551,131 @@ function TrainingSection() {
     queryFn: () => fetch("/api/content/training").then(r => r.json()),
   });
 
-  if (trainingList.length === 0) return null;
+  const { data: programs = [] } = useQuery<any[]>({
+    queryKey: ["content", "training-programs"],
+    queryFn: () => fetch("/api/content/training-programs").then(r => r.json()),
+  });
+
+  if (trainingList.length === 0 && programs.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {trainingList.map((item) => {
-        const LucideIcon = (Icons as any)[item.icon] || Icons.GraduationCap;
-        return (
-          <CardWrapper key={item.id} link={item.link} className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group h-full cursor-pointer">
-            <div className="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-              <LucideIcon className="w-7 h-7" />
+    <div className="space-y-16">
+      {/* Available programmes — the list users come here for */}
+      {programs.length > 0 && (
+        <section>
+          <div className="text-center mb-10">
+            <p className="text-primary font-semibold tracking-wider uppercase text-sm mb-2">Enroll Now</p>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">Available Training Programs</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
+              Browse our current programmes and register directly.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {programs.map((program: any) => (
+              <TrainingProgramCard key={program.id} program={program} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Training categories overview */}
+      {trainingList.length > 0 && (
+        <section>
+          {programs.length > 0 && (
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">What We Offer</h2>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-            <p className="text-gray-600 leading-relaxed">{item.description}</p>
-          </CardWrapper>
-        );
-      })}
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trainingList.map((item) => {
+              const LucideIcon = (Icons as any)[item.icon] || Icons.GraduationCap;
+              return (
+                <CardWrapper key={item.id} link={item.link} className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group h-full cursor-pointer">
+                  <div className="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <LucideIcon className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                </CardWrapper>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
+}
+
+function TrainingProgramCard({ program }: { program: any }) {
+  const meta: { icon: typeof Clock; label: string; value: string }[] = [];
+  if (program.duration) meta.push({ icon: Clock, label: "Duration", value: program.duration });
+  if (program.mode) meta.push({ icon: MonitorPlay, label: "Mode", value: program.mode });
+  if (program.startDate) meta.push({ icon: CalendarDays, label: "Starts", value: formatProgramDate(program.startDate) });
+  if (program.eligibility) meta.push({ icon: UserCheck, label: "Eligibility", value: program.eligibility });
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden h-full">
+      {program.coverImage && (
+        <div className="aspect-video w-full bg-gray-100 overflow-hidden">
+          <img
+            src={program.coverImage}
+            alt={program.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+
+      <div className="p-7 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 leading-snug">{program.name}</h3>
+
+        {program.description && (
+          <p className="text-gray-600 text-sm leading-relaxed mb-5">{program.description}</p>
+        )}
+
+        {meta.length > 0 && (
+          <dl className="space-y-2.5 mb-6">
+            {meta.map(({ icon: MetaIcon, label, value }) => (
+              <div key={label} className="flex items-start gap-2.5 text-sm">
+                <MetaIcon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <dt className="sr-only">{label}</dt>
+                <dd className="text-gray-700">
+                  <span className="text-gray-400">{label}: </span>
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        <div className="mt-auto pt-2">
+          {program.registrationUrl ? (
+            <a
+              href={program.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors cursor-pointer"
+            >
+              Register Now <ExternalLink className="w-4 h-4" />
+            </a>
+          ) : (
+            <span className="inline-flex w-full items-center justify-center gap-2 bg-gray-100 text-gray-400 font-semibold px-6 py-3 rounded-full text-sm cursor-not-allowed">
+              Registration Opening Soon
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Start dates are stored as free text so admins can type "Rolling intake" as well as
+// a real date; only reformat when it actually parses as one.
+function formatProgramDate(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 // ─── Contact Page Section ──────────────────────────────────────────────────
@@ -689,7 +796,9 @@ function ContactSection() {
 }
 
 // ─── Homepage Photo Gallery ─────────────────────────────────────────────────
-function HomepageGallery() {
+// Rendered both as a section on the home page and as the whole /gallery page. The
+// dedicated page already gets its title from the PageBanner, so it hides the header.
+function HomepageGallery({ showHeader = true }: { showHeader?: boolean } = {}) {
   const [lightboxPhoto, setLightboxPhoto] = useState<any>(null);
 
   const { data: photos = [] } = useQuery<any[]>({
@@ -703,34 +812,72 @@ function HomepageGallery() {
 
   if (photos.length === 0) return null;
 
+  // Group photos under their Event / Category heading, preserving the order the API
+  // returned. Photos with no category collapse into one trailing ungrouped set, so a
+  // gallery where nobody has set a category renders exactly as it did before.
+  const groups: { category: string; items: any[] }[] = [];
+  for (const photo of photos) {
+    const category = (photo.category || "").trim();
+    const existing = groups.find(g => g.category === category);
+    if (existing) {
+      existing.items.push(photo);
+    } else {
+      groups.push({ category, items: [photo] });
+    }
+  }
+  groups.sort((a, b) => (a.category === "" ? 1 : 0) - (b.category === "" ? 1 : 0));
+
+  const hasCategories = groups.some(g => g.category !== "");
+
   return (
     <>
       <section className="bg-white p-8 md:p-12 rounded-2xl border border-gray-200 shadow-sm">
-        <div className="text-center mb-10">
-          <p className="text-primary font-semibold tracking-wider uppercase text-sm mb-2">Our Gallery</p>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">Photo Gallery</h2>
-          <p className="text-gray-500 mt-3 max-w-2xl mx-auto">A glimpse into our projects, facilities, and team in action.</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {photos.map((photo: any, idx: number) => (
-            <div
-              key={photo.id || idx}
-              className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              onClick={() => setLightboxPhoto(photo)}
-            >
-              <img
-                src={photo.imageUrl}
-                alt={photo.title || "Gallery photo"}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {(photo.title || photo.description) && (
-                <div className="absolute inset-x-0 bottom-0 p-3 text-white translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  {photo.title && <h4 className="font-bold text-sm truncate">{photo.title}</h4>}
-                  {photo.description && <p className="text-[11px] text-gray-300 line-clamp-2 mt-0.5">{photo.description}</p>}
+        {showHeader && (
+          <div className="text-center mb-10">
+            <p className="text-primary font-semibold tracking-wider uppercase text-sm mb-2">Our Gallery</p>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">Photo Gallery</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">A glimpse into our projects, facilities, and team in action.</p>
+          </div>
+        )}
+
+        <div className="space-y-12">
+          {groups.map((group) => (
+            <div key={group.category || "__ungrouped"}>
+              {hasCategories && (
+                <div className="flex items-center gap-4 mb-5">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 shrink-0">
+                    {group.category || "More Photos"}
+                  </h3>
+                  <span className="text-xs font-medium text-gray-400 shrink-0">
+                    {group.items.length} {group.items.length === 1 ? "photo" : "photos"}
+                  </span>
+                  <div className="h-px bg-gray-200 flex-grow" />
                 </div>
               )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {group.items.map((photo: any, idx: number) => (
+                  <div
+                    key={photo.id || idx}
+                    className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    onClick={() => setLightboxPhoto(photo)}
+                  >
+                    <img
+                      src={photo.imageUrl}
+                      alt={photo.title || "Gallery photo"}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {(photo.title || photo.description) && (
+                      <div className="absolute inset-x-0 bottom-0 p-3 text-white translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        {photo.title && <h4 className="font-bold text-sm truncate">{photo.title}</h4>}
+                        {photo.description && <p className="text-[11px] text-gray-300 line-clamp-2 mt-0.5">{photo.description}</p>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -779,9 +926,8 @@ function HomeSection() {
   });
 
   const stats = homeContent?.stats || [
-    { value: "50+", label: "Global Projects" },
-    { value: "30%", label: "Avg Energy Saved" },
-    { value: "15+", label: "Patents & Pubs" },
+    { value: "10+", label: "Global Projects" },
+    { value: "50%", label: "Efficiency" },
     { value: "100%", label: "Sustainable Focus" },
   ];
 
@@ -791,7 +937,7 @@ function HomeSection() {
     <div className="space-y-16">
       {/* Stats bar */}
       <section className="bg-primary text-white py-12 rounded-2xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20 px-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-center divide-x divide-white/20 px-8">
           {stats.map((stat: any, i: number) => (
             <div key={i}>
               <div className="text-4xl font-bold font-serif mb-2">{stat.value}</div>
@@ -885,6 +1031,28 @@ const SLUG_CONTENT_MAP: Record<string, React.ComponentType> = {
   training: TrainingSection,
   contact: ContactSection,
   careers: CareersSection,
+  gallery: GalleryPageSection,
+};
+
+// The /gallery page is the full photo gallery; its title comes from the PageBanner.
+function GalleryPageSection() {
+  return <HomepageGallery showHeader={false} />;
+}
+
+// Core pages render from their own database tables, so they must stay reachable even
+// if the CMS "pages" row is missing or an admin unpublished it. Without this, a blank
+// pages table turns every built-in route (notably /contact) into a 404.
+const DEFAULT_PAGE_META: Record<string, { title: string; subtitle: string; heroImage: string }> = {
+  home: { title: "Home", subtitle: "SustainPro Homepage", heroImage: "/hero-bg.png" },
+  about: { title: "About Us", subtitle: "Engineering a greener tomorrow", heroImage: "/about-bg.png" },
+  services: { title: "Our Services", subtitle: "Comprehensive Engineering Solutions", heroImage: "/hero-bg.png" },
+  industries: { title: "Industries We Serve", subtitle: "Global Industrial Expertise", heroImage: "/about-bg.png" },
+  research: { title: "Research & Development", subtitle: "Pioneering Sustainable Innovation", heroImage: "/research-bg.png" },
+  software: { title: "Software Solutions", subtitle: "Advanced Process Modeling Tools", heroImage: "/about-bg.png" },
+  training: { title: "Training Programs", subtitle: "Empowering Your Engineering Team", heroImage: "/about-bg.png" },
+  careers: { title: "Careers", subtitle: "Join Our Dynamic Team", heroImage: "/about-bg.png" },
+  contact: { title: "Contact Us", subtitle: "Get in touch with our experts", heroImage: "/about-bg.png" },
+  gallery: { title: "Photo Gallery", subtitle: "Moments from our projects, training programs and events", heroImage: "/about-bg.png" },
 };
 
 // ─── Main DynamicPage Component ─────────────────────────────────────────────
@@ -892,14 +1060,27 @@ export default function DynamicPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const [selectedMedia, setSelectedMedia] = useState<GalleryItem | null>(null);
 
-  const { data: page, isLoading, error } = useQuery<PageData | null>({
+  const { data: fetchedPage, isLoading } = useQuery<PageData | null>({
     queryKey: ["public-page", slug, window.location.search],
     queryFn: async () => {
       const res = await fetch(`/api/content/page/${slug}${window.location.search}`);
+      // 404 means the admin deliberately unpublished this page — keep it hidden
+      // rather than letting the built-in fallback below resurrect it.
+      if (res.status === 404) return { __unpublished: true } as unknown as PageData;
       if (!res.ok) throw new Error("Page not found");
       return res.json();
     },
   });
+
+  // A null body means there is simply no CMS row for this slug. Built-in pages then
+  // fall back to their default metadata and still render their own content section,
+  // so a missing row no longer turns /contact (or any core route) into a 404.
+  const isUnpublished = (fetchedPage as unknown as { __unpublished?: boolean })?.__unpublished === true;
+  const fallbackMeta = DEFAULT_PAGE_META[slug];
+  const page: PageData | null = isUnpublished
+    ? null
+    : fetchedPage ??
+      (fallbackMeta ? ({ ...fallbackMeta, description: "", sections: [], gallery: [] } as unknown as PageData) : null);
 
   useEffect(() => {
     if (page) {
@@ -930,7 +1111,7 @@ export default function DynamicPage({ params }: { params: { slug: string } }) {
     );
   }
 
-  if (error || !page) {
+  if (!page) {
     return (
       <div className="pt-32 pb-20 text-center min-h-[60vh] bg-gray-50 flex flex-col items-center justify-center">
         <h1 className="text-4xl font-serif font-bold text-gray-900 mb-4">404 - Page Not Found</h1>

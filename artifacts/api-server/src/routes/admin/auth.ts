@@ -250,9 +250,14 @@ router.post("/auth/forgot-password", async (req, res) => {
       expiresAt: expiresAt.toISOString(),
     });
 
-    // Console logging the reset URL as per the plan
+    // Console logging the reset URL as per the plan.
+    // The origin must not be hardcoded to localhost or the link is useless in
+    // production; fall back to the requesting host so it works on any domain.
+    const resetOrigin =
+      process.env["PUBLIC_SITE_URL"]?.replace(/\/+$/, "") ||
+      `${req.protocol}://${req.get("host")}`;
     req.log.warn(
-      `[PASSWORD RESET LINK]: http://localhost:5173/admin/reset-password?token=${token}`
+      `[PASSWORD RESET LINK]: ${resetOrigin}/admin/reset-password?token=${token}`
     );
 
     res.json({

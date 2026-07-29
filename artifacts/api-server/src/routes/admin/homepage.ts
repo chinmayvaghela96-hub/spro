@@ -18,20 +18,19 @@ router.get("/homepage", async (req, res) => {
         heroSubtitle: "Global engineering consultancy specializing in chemical engineering, advanced modeling, and sustainable industrial innovation.",
         heroBgImage: "/hero-bg.png",
         stats: [
-          { "value": "50+", "label": "Global Projects" },
-          { "value": "30%", "label": "Avg Energy Saved" },
-          { "value": "15+", "label": "Patents & Pubs" },
+          { "value": "10+", "label": "Global Projects" },
+          { "value": "50%", "label": "Efficiency" },
           { "value": "100%", "label": "Sustainable Focus" }
         ],
         servicesTitle: "Comprehensive Engineering Solutions",
         servicesSubtitle: "We deliver end-to-end technical excellence across the entire chemical and process engineering lifecycle.",
-        sustainabilityTitle: "Pioneering the Transition to Green Engineering",
-        sustainabilityText: "At SustainPro Process Solutions™, we don't just optimize for today's margins; we engineer for tomorrow's reality. Our core philosophy integrates sustainability into every calculation, simulation, and design.",
+        sustainabilityTitle: "Pioneering the Transition to Efficient and Sustainable Solutions",
+        sustainabilityText: "At SustainPro Process Solutions LLP, we partner with chemical, petrochemical, pharmaceutical, and biochemical industries to design smarter, optimize existing processes, and implement sustainable engineering solutions. Our expertise combines process engineering, simulation, and data-driven optimization to improve productivity, reduce resource and energy consumption, and enhance environmental performance. We are committed to helping organizations achieve operational excellence while building a more sustainable future.",
         sustainabilityItems: [
-          "Green Chemistry & Circular Economy",
-          "Carbon Capture & Utilization Technology",
-          "Deep Eutectic Solvents (DES) Research",
-          "Energy-Intensive Process Transformation"
+          "Engineering Solutions",
+          "Process Excellence",
+          "Sustainability",
+          "Training and Consulting"
         ],
         ctaTitle: "Ready to Optimize Your Operations?",
         ctaSubtitle: "Partner with our world-class engineering team to drive efficiency, sustainability, and innovation in your facility.",

@@ -11,12 +11,12 @@ import {
   publications,
   softwareItems,
   trainingTypes,
+  trainingPrograms,
   events,
   siteSettings,
   contactInfo,
   donations,
-  jobPositions,
-  sirProfile
+  jobPositions
 } from "@workspace/db";
 
 async function main() {
@@ -105,24 +105,70 @@ async function main() {
       heroSubtitle: "Global engineering consultancy specializing in chemical engineering, advanced modeling, and sustainable industrial innovation.",
       heroBgImage: "/hero-bg.png",
       stats: [
-        { "value": "50+", "label": "Global Projects" },
-        { "value": "30%", "label": "Avg Energy Saved" },
-        { "value": "15+", "label": "Patents & Pubs" },
+        { "value": "10+", "label": "Global Projects" },
+        { "value": "50%", "label": "Efficiency" },
         { "value": "100%", "label": "Sustainable Focus" }
       ],
       servicesTitle: "Comprehensive Engineering Solutions",
       servicesSubtitle: "We deliver end-to-end technical excellence across the entire chemical and process engineering lifecycle.",
-      sustainabilityTitle: "Pioneering the Transition to Green Engineering",
-      sustainabilityText: "At SustainPro Process Solutions™, we don't just optimize for today's margins; we engineer for tomorrow's reality. Our core philosophy integrates sustainability into every calculation, simulation, and design.",
+      sustainabilityTitle: "Pioneering the Transition to Efficient and Sustainable Solutions",
+      sustainabilityText: "At SustainPro Process Solutions LLP, we partner with chemical, petrochemical, pharmaceutical, and biochemical industries to design smarter, optimize existing processes, and implement sustainable engineering solutions. Our expertise combines process engineering, simulation, and data-driven optimization to improve productivity, reduce resource and energy consumption, and enhance environmental performance. We are committed to helping organizations achieve operational excellence while building a more sustainable future.",
       sustainabilityItems: [
-        "Green Chemistry & Circular Economy",
-        "Carbon Capture & Utilization Technology",
-        "Deep Eutectic Solvents (DES) Research",
-        "Energy-Intensive Process Transformation"
+        "Engineering Solutions",
+        "Process Excellence",
+        "Sustainability",
+        "Training and Consulting"
       ],
       ctaTitle: "Ready to Optimize Your Operations?",
       ctaSubtitle: "Partner with our world-class engineering team to drive efficiency, sustainability, and innovation in your facility.",
     }).onConflictDoNothing();
+
+    // 5b. Seed Training Programs
+    console.log("Seeding training programs...");
+    const existingPrograms = await db.select().from(trainingPrograms).limit(1);
+    if (existingPrograms.length === 0) {
+      await db.insert(trainingPrograms).values([
+        {
+          name: "Process Simulation with Aspen Plus",
+          description:
+            "Hands-on training covering steady-state simulation, property methods, and flowsheet convergence for practising engineers.",
+          duration: "6 weeks",
+          eligibility: "B.E. / B.Tech in Chemical Engineering or equivalent",
+          mode: "Online",
+          startDate: "",
+          registrationUrl: "https://sustainpro.example.com/register/aspen-plus",
+          coverImage: "",
+          order: 1,
+          isActive: true,
+        },
+        {
+          name: "Energy Efficiency & Pinch Analysis",
+          description:
+            "Identify and quantify energy-saving opportunities across heat exchanger networks using pinch technology.",
+          duration: "4 weeks",
+          eligibility: "Practising process and utility engineers",
+          mode: "Hybrid",
+          startDate: "",
+          registrationUrl: "https://sustainpro.example.com/register/pinch-analysis",
+          coverImage: "",
+          order: 2,
+          isActive: true,
+        },
+        {
+          name: "Industrial Safety & HAZOP Fundamentals",
+          description:
+            "Structured introduction to hazard identification, HAZOP methodology, and risk ranking for plant teams.",
+          duration: "2 weeks",
+          eligibility: "",
+          mode: "Offline",
+          startDate: "",
+          registrationUrl: "https://sustainpro.example.com/register/hazop",
+          coverImage: "",
+          order: 3,
+          isActive: true,
+        },
+      ]);
+    }
 
     // 6. Seed About Page Content
     console.log("Seeding about page content...");
@@ -311,22 +357,6 @@ async function main() {
         { title: "UI/UX Designer", isOpen: false, order: 8 },
         { title: "Intern", isOpen: false, order: 9 },
       ]);
-    }
-
-    // 14. Seed Sir Profile
-    console.log("Seeding sir profile...");
-    const existingProfile = await db.select().from(sirProfile).limit(1);
-    if (existingProfile.length === 0) {
-      await db.insert(sirProfile).values({
-        fullName: "Sir",
-        designation: "Founder & Director",
-        email: "sustain.process@gmail.com",
-        phone: "8735045762",
-        city: "",
-        fullAddress: "",
-        photoUrl: null,
-        bio: "",
-      });
     }
 
     console.log("Database seeded successfully!");

@@ -15,7 +15,8 @@ import {
   pageBanners,
   navItems,
   pages,
-  galleryPhotos
+  galleryPhotos,
+  trainingPrograms
 } from "@workspace/db";
 import { asc, eq, and } from "drizzle-orm";
 
@@ -41,9 +42,23 @@ router.get("/content/page/:slug", async (req, res) => {
     const [pageItem] = await db
       .select()
       .from(pages)
-      .where(isPreview ? eq(pages.slug, slug) : and(eq(pages.slug, slug), eq(pages.isActive, true)))
+      .where(eq(pages.slug, slug))
       .limit(1);
-    res.json(pageItem || null);
+
+    // Distinguish "no row at all" from "row exists but the admin unpublished it".
+    // Both used to return null, so the client could not tell an unpublished page
+    // from a missing one and had to treat every core page as a 404.
+    if (!pageItem) {
+      res.json(null);
+      return;
+    }
+
+    if (!pageItem.isActive && !isPreview) {
+      res.status(404).json({ error: "Page is not published", unpublished: true });
+      return;
+    }
+
+    res.json(pageItem);
   } catch (error) {
     req.log.error(error, `Get dynamic page details for slug "${slug}" error`);
     res.status(500).json({ error: `Internal server error retrieving page "${slug}"` });
@@ -103,6 +118,13 @@ router.get("/content/:page", async (req, res) => {
         .from(galleryPhotos)
         .where(eq(galleryPhotos.isActive, true))
         .orderBy(asc(galleryPhotos.order));
+      res.json(list);
+    } else if (page === "training-programs") {
+      const list = await db
+        .select()
+        .from(trainingPrograms)
+        .where(eq(trainingPrograms.isActive, true))
+        .orderBy(asc(trainingPrograms.order));
       res.json(list);
     } else {
       res.status(404).json({ error: "Page content not found" });

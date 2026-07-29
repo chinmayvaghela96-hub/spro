@@ -19,7 +19,10 @@ A modern, full-stack sustainability consulting website with a powerful admin por
 
 ### 🔐 Admin Portal (`/admin`)
 - **Dashboard** — Stats overview at a glance
-- **Content Management** — Services, Industries, Software, Training
+- **Content Management** — Services, Industries, Software, Training Categories
+- **Training Programs** — Full programme listings (duration, mode, eligibility, start date,
+  cover image, registration link) with enable/disable and display ordering; drives the
+  public `/training` page
 - **Page Builder** — Create and edit custom pages
 - **Hero Slides & Banners** — Manage homepage sliders and page banners
 - **Media Library** — Upload and manage images
@@ -146,7 +149,22 @@ spro/
 
 The project uses **SQLite** with the database file at `sustainpro.db`. Migrations are in `lib/db/drizzle/` and run automatically on server startup.
 
-To reset the database, simply delete `sustainpro.db` and restart the API server — it will recreate and seed the database automatically.
+To reset the database, delete `sustainpro.db`, run the seed script, then start the API server:
+
+```bash
+node artifacts/api-server/dist/seed.mjs
+```
+
+> ⚠️ **Stop the API server before running the seed script.** The database is loaded
+> through `sql.js`, so each process holds the *entire* database in memory and rewrites
+> the whole file every 10 seconds. If the server is running while another process writes
+> to `sustainpro.db`, the server's older in-memory snapshot overwrites those writes and
+> the changes are silently lost. For the same reason, never run two API server instances
+> against one database file.
+
+Note that starting the API server alone creates the schema and seeds default pages and
+hero slides, but the remaining content (homepage, services, training programs, etc.)
+only appears after you run the seed script above.
 
 ---
 

@@ -40,7 +40,17 @@ export default function PageEditor({ params }: PageEditorProps) {
   const [, setLocation] = useLocation();
   const queryClient = queryClientHook();
   
-  const [activeTab, setActiveTab] = useState<"general" | "about-us" | "advisors" | "sections" | "gallery" | "seo">("general");
+  // Allow deep-linking straight to a tab, e.g. ?tab=advisors from the sidebar's
+  // "Faculty Advisors" shortcut, so the editor doesn't have to be hunted for.
+  const initialTab = (() => {
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    const allowed = ["general", "about-us", "advisors", "sections", "gallery", "seo"] as const;
+    return (allowed as readonly string[]).includes(requested || "")
+      ? (requested as (typeof allowed)[number])
+      : "general";
+  })();
+
+  const [activeTab, setActiveTab] = useState<"general" | "about-us" | "advisors" | "sections" | "gallery" | "seo">(initialTab);
 
   // Form states
   const [title, setTitle] = useState("");

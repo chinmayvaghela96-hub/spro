@@ -51,11 +51,17 @@ export function Navbar() {
       label: p.title
     }));
 
-  const activeLinks = dynamicLinks.length > 0
+  const resolvedLinks = dynamicLinks.length > 0
     ? dynamicLinks.map(link => ({ href: link.href, label: link.label }))
     : dynamicPages.length > 0
     ? pageLinks
     : defaultLinks;
+
+  // Contact already has its own CTA button in both the desktop bar and the mobile
+  // menu, so drop it from the link row to avoid showing "Contact Us" twice.
+  const activeLinks = resolvedLinks.filter(
+    link => (link.href || "").replace(/\/+$/, "").toLowerCase() !== "/contact"
+  );
 
   return (
     <nav className={`sticky top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm py-2" : "bg-white py-4"}`}>
@@ -71,7 +77,9 @@ export function Navbar() {
             </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-1 lg:space-x-4">
+          {/* The full link row plus the CTA needs ~1230px, so it only appears at xl.
+              Showing it from md made the header overflow and scroll sideways on tablets. */}
+          <div className="hidden xl:flex items-center space-x-1 2xl:space-x-4">
             {activeLinks.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm font-medium text-gray-600 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-gray-50">
                 {link.label}
@@ -84,7 +92,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-gray-900 p-2 focus:outline-none">
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -94,7 +102,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b shadow-lg animate-in slide-in-from-top-2">
+        <div className="xl:hidden absolute top-full left-0 w-full bg-white border-b shadow-lg animate-in slide-in-from-top-2">
           <div className="px-2 pt-2 pb-4 space-y-1">
             {activeLinks.map((link) => (
               <Link 

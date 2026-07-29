@@ -22,9 +22,10 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
+  // No file size limit: admins upload photos straight from a phone or camera and
+  // full-resolution originals are kept as-is. Uploading is behind requireAuth, and
+  // multer streams to disk rather than buffering in memory, so the only practical
+  // bound is free disk space.
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "image/jpeg",

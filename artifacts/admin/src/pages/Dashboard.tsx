@@ -10,15 +10,12 @@ import {
   Bell,
   Eye,
   TrendingUp,
-  Phone,
-  MapPin,
   Pencil,
-  UserCircle,
+  GraduationCap,
   BriefcaseBusiness,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import type { SirProfile } from "./SirInformation";
-import { getInitials } from "./SirInformation";
+import { useAuth } from "../contexts/AuthContext";
 import type { Career } from "./Careers";
 
 interface DashboardStats {
@@ -41,36 +38,13 @@ function ContactChip({ icon, value }: { icon: React.ReactNode; value: string }) 
 
 function ProfileHero() {
   const [, navigate] = useLocation();
-  const { data: profile, isLoading, isError } = useQuery<SirProfile>({
-    queryKey: ["sir-profile"],
-    queryFn: () => apiGet("/admin/sir-profile"),
-    retry: 1,
-  });
+  // Greets whoever is actually signed in. This used to read a separate singleton
+  // "sir profile" record, which duplicated the admin account and always showed the
+  // same hardcoded name no matter who logged in.
+  const { admin } = useAuth();
 
-  if (isLoading) {
-    return (
-      <Card padding={false} className="overflow-hidden hover:translate-y-0">
-        <Skeleton className="h-24 md:h-28 rounded-none" />
-        <div className="px-6 md:px-8 pb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="-mt-10 shrink-0">
-              <Skeleton className="w-20 h-20 rounded-full" />
-            </div>
-            <div className="flex-1 space-y-2.5 pt-2">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-7 w-64 max-w-full" />
-            </div>
-          </div>
-          <div className="flex gap-2 mt-4">
-            <Skeleton className="h-7 w-32 rounded-full" />
-            <Skeleton className="h-7 w-44 rounded-full" />
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  const hasProfile = !isError && !!profile;
+  const displayName = admin?.name?.trim() || "SustainPro Admin";
+  const designation = admin?.role?.trim() || "";
 
   return (
     <Card padding={false} className="overflow-hidden hover:translate-y-0">
@@ -94,57 +68,49 @@ function ProfileHero() {
           <div className="flex flex-col sm:flex-row gap-4 min-w-0">
             {/* Avatar */}
             <div className="-mt-10 shrink-0">
-              {hasProfile && profile.photoUrl ? (
-                <img
-                  src={profile.photoUrl}
-                  alt={profile.fullName || "Profile photo"}
-                  className="w-20 h-20 rounded-full object-cover ring-4 ring-[var(--color-surface)] shadow-lg"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] ring-4 ring-[var(--color-surface)] shadow-lg flex items-center justify-center">
-                  <span className="text-white font-bold font-serif text-xl tracking-wide">
-                    {hasProfile ? getInitials(profile.fullName) : "SP"}
-                  </span>
-                </div>
-              )}
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] ring-4 ring-[var(--color-surface)] shadow-lg flex items-center justify-center">
+                <span className="text-white font-bold font-serif text-xl tracking-wide">
+                  {getInitials(displayName)}
+                </span>
+              </div>
             </div>
 
             <div className="min-w-0 pt-2">
               <p className="text-sm font-medium text-[var(--color-text-muted)]">Welcome back,</p>
               <h2 className="text-2xl md:text-3xl font-bold font-serif text-[var(--color-text)] tracking-tight truncate">
-                {hasProfile && profile.fullName?.trim() ? profile.fullName : "SustainPro Admin"}
+                {displayName}
               </h2>
-              {hasProfile && profile.designation?.trim() && (
+              {designation && (
                 <div className="mt-1.5">
-                  <Badge color="primary">{profile.designation}</Badge>
+                  <Badge color="primary">{designation}</Badge>
                 </div>
               )}
             </div>
           </div>
 
           <div className="shrink-0">
-            <Button variant="secondary" size="sm" onClick={() => navigate("/admin/sir-info")}>
+            <Button variant="secondary" size="sm" onClick={() => navigate("/admin/change-password")}>
               <Pencil className="w-4 h-4" />
-              Edit Profile
+              Change Password
             </Button>
           </div>
         </div>
 
         {/* Contact chips */}
-        {hasProfile ? (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {profile.phone?.trim() && <ContactChip icon={<Phone className="w-3.5 h-3.5" />} value={profile.phone} />}
-            {profile.email?.trim() && <ContactChip icon={<Mail className="w-3.5 h-3.5" />} value={profile.email} />}
-            {profile.city?.trim() && <ContactChip icon={<MapPin className="w-3.5 h-3.5" />} value={profile.city} />}
-          </div>
-        ) : (
-          <p className="text-sm text-[var(--color-text-muted)] mt-4 leading-relaxed">
-            Manage your website content, careers, and profile from this dashboard.
-          </p>
-        )}
+        <div className="flex flex-wrap gap-2 mt-4">
+          {admin?.email?.trim() && <ContactChip icon={<Mail className="w-3.5 h-3.5" />} value={admin.email} />}
+        </div>
       </div>
     </Card>
   );
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "SP";
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
+  return (first + last).toUpperCase() || "SP";
 }
 
 export default function Dashboard() {
@@ -173,7 +139,7 @@ export default function Dashboard() {
   const quickActions = [
     { label: "Page Builder", path: "/admin/pages", icon: <FileText className="w-5 h-5" />, color: "var(--color-primary)" },
     { label: "Careers", path: "/admin/careers", icon: <BriefcaseBusiness className="w-5 h-5" />, color: "#0ea5e9" },
-    { label: "Sir Information", path: "/admin/sir-info", icon: <UserCircle className="w-5 h-5" />, color: "var(--color-accent)" },
+    { label: "Training Programs", path: "/admin/training-programs", icon: <GraduationCap className="w-5 h-5" />, color: "var(--color-accent)" },
     { label: "Manage Events", path: "/admin/events", icon: <Calendar className="w-5 h-5" />, color: "#14b8a6" },
     { label: "View Messages", path: "/admin/messages", icon: <Mail className="w-5 h-5" />, color: "#f59e0b" },
     { label: "Upload Media", path: "/admin/media", icon: <Image className="w-5 h-5" />, color: "#8b5cf6" },
@@ -258,7 +224,7 @@ export default function Dashboard() {
             { step: "2", text: "Add hero slider images to the homepage", link: "/admin/hero-slides" },
             { step: "3", text: "Publish events and notices", link: "/admin/events" },
             { step: "4", text: "Open career positions for applications", link: "/admin/careers" },
-            { step: "5", text: "Review Sir Information and site settings", link: "/admin/sir-info" },
+            { step: "5", text: "Review training programs and site settings", link: "/admin/training-programs" },
           ].map((item) => (
             <Link
               key={item.step}

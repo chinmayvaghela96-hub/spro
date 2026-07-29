@@ -23,8 +23,9 @@ import {
   BookOpen,
   Link2,
   LayoutTemplate,
-  UserCircle,
   BriefcaseBusiness,
+  UserCircle,
+  DownloadCloud,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -40,12 +41,14 @@ const navItems = [
   { label: "Services", path: "/admin/services", icon: Briefcase },
   { label: "Industries", path: "/admin/industries", icon: Factory },
   { label: "Software", path: "/admin/software", icon: Monitor },
-  { label: "Training", path: "/admin/training", icon: GraduationCap },
+  { label: "Training Categories", path: "/admin/training", icon: GraduationCap },
+  { label: "Training Programs", path: "/admin/training-programs", icon: GraduationCap },
   { label: "Careers", path: "/admin/careers", icon: BriefcaseBusiness },
   { label: "Hero Slides", path: "/admin/hero-slides", icon: Sliders },
   { label: "Photo Gallery", path: "/admin/gallery", icon: Image },
   { label: "Page Banners", path: "/admin/page-banners", icon: Image },
   { label: "Navigation Links", path: "/admin/nav-items", icon: Link2 },
+  { label: "Faculty Advisors", path: "/admin/faculty-advisors", icon: UserCircle },
   { label: "Publications", path: "/admin/publications", icon: BookOpen },
   { divider: true, label: "Platform Management" },
   { label: "Events", path: "/admin/events", icon: Calendar },
@@ -53,11 +56,11 @@ const navItems = [
   { label: "Messages", path: "/admin/messages", icon: Mail },
   { label: "Media Library", path: "/admin/media", icon: Image },
   { divider: true, label: "Settings" },
-  { label: "Sir Information", path: "/admin/sir-info", icon: UserCircle },
   { label: "Contact Info", path: "/admin/contact-info", icon: Phone },
   { label: "Footer", path: "/admin/footer", icon: PanelBottom },
   { label: "Donations", path: "/admin/donations", icon: Heart },
   { label: "Settings", path: "/admin/settings", icon: Settings },
+  { label: "Backup & Export", path: "/admin/backup", icon: DownloadCloud },
 ] as const;
 
 export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps) {

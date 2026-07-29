@@ -61,14 +61,35 @@ app.use("/api", router);
 const adminDistPath = path.resolve(__dirname, "..", "..", "admin", "dist");
 if (fs.existsSync(adminDistPath)) {
   app.use("/admin", express.static(adminDistPath));
-  // Fallback for HTML5 client-side routing in Admin Dashboard
-  app.get(/\/admin(?:\/.*)?$/, (req, res) => {
+  // Fallback for HTML5 client-side routing in Admin Dashboard.
+  // Anchored at the start: an unanchored /\/admin/ also matched paths like
+  // /api/admin/whatever, so unknown admin API routes returned this HTML with a 200
+  // instead of a JSON 404.
+  app.get(/^\/admin(?:\/.*)?$/, (req, res) => {
     res.sendFile(path.resolve(adminDistPath, "index.html"));
   });
 } else {
   // Graceful response in development if admin app is not built yet
-  app.get(/\/admin(?:\/.*)?$/, (req, res) => {
+  app.get(/^\/admin(?:\/.*)?$/, (req, res) => {
     res.send("Admin Dashboard Frontend is not built yet. Run `pnpm --filter @workspace/admin run build` or start its dev server.");
+  });
+}
+
+// Serve the public website SPA if built.
+// Without this, the site is client-side routed only: loading or refreshing a deep
+// link such as /contact hits the server directly and 404s, because nothing returns
+// index.html for non-API paths. Registered last so /api, /uploads and /admin win.
+const publicDistPath = path.resolve(__dirname, "..", "..", "sustainpro", "dist", "public");
+if (fs.existsSync(publicDistPath)) {
+  app.use(express.static(publicDistPath));
+  // HTML5 history fallback for every non-API, non-upload, non-admin GET.
+  app.get(/^(?!\/api\/|\/uploads\/|\/admin(?:\/|$)).*/, (req, res, next) => {
+    // Let genuinely missing static assets 404 rather than returning HTML for them.
+    if (path.extname(req.path)) {
+      next();
+      return;
+    }
+    res.sendFile(path.resolve(publicDistPath, "index.html"));
   });
 }
 

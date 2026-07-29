@@ -8,6 +8,7 @@ import industriesRouter from "./industries";
 import researchRouter from "./research";
 import softwareRouter from "./software";
 import trainingRouter from "./training";
+import trainingProgramsRouter from "./trainingPrograms";
 import eventsRouter from "./events";
 import noticesRouter from "./notices";
 import messagesRouter from "./messages";
@@ -18,8 +19,8 @@ import pageBannersRouter from "./pageBanners";
 import navItemsRouter from "./navItems";
 import pagesRouter from "./pages";
 import galleryRouter from "./gallery";
-import sirProfileRouter from "./sirProfile";
 import careersRouter from "./careers";
+import backupRouter from "./backup";
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.use(industriesRouter);
 router.use(researchRouter);
 router.use(softwareRouter);
 router.use(trainingRouter);
+router.use(trainingProgramsRouter);
 router.use(eventsRouter);
 router.use(noticesRouter);
 router.use(messagesRouter);
@@ -42,7 +44,7 @@ router.use(pageBannersRouter);
 router.use(navItemsRouter);
 router.use(pagesRouter);
 router.use(galleryRouter);
-router.use(sirProfileRouter);
 router.use(careersRouter);
+router.use(backupRouter);
 
 export default router;

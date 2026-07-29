@@ -98,6 +98,7 @@ try {
     { slug: "research", title: "Research & Development", subtitle: "Pioneering Sustainable Innovation", heroImage: "/research-bg.png" },
     { slug: "software", title: "Software Solutions", subtitle: "Advanced Process Modeling Tools", heroImage: "/about-bg.png" },
     { slug: "training", title: "Training Programs", subtitle: "Empowering Your Engineering Team", heroImage: "/about-bg.png" },
+    { slug: "gallery", title: "Gallery", subtitle: "Moments from our projects, training programs and events", heroImage: "/about-bg.png" },
     { slug: "careers", title: "Careers", subtitle: "Join Our Dynamic Team", heroImage: "/about-bg.png" },
     { slug: "contact", title: "Contact Us", subtitle: "Get in touch with our experts", heroImage: "/about-bg.png" }
   ];

@@ -45,6 +45,33 @@ router.post("/services", requireAuth, async (req, res) => {
   }
 });
 
+// Reorder services
+// NOTE: must be registered before "/services/:id" or Express matches this as id="reorder".
+router.put("/services/reorder", requireAuth, async (req, res) => {
+  try {
+    const { items } = req.body; // Array of { id: number, order: number }
+
+    if (!items || !Array.isArray(items)) {
+      res.status(400).json({ error: "Items array is required" });
+      return;
+    }
+
+    await db.transaction(async (tx) => {
+      for (const item of items) {
+        await tx
+          .update(services)
+          .set({ order: Number(item.order), updatedAt: new Date().toISOString() })
+          .where(eq(services.id, Number(item.id)));
+      }
+    });
+
+    res.json({ success: true, message: "Services reordered successfully" });
+  } catch (error) {
+    req.log.error(error, "Reorder services error");
+    res.status(500).json({ error: "Internal server error reordering services" });
+  }
+});
+
 // Update service
 router.put("/services/:id", requireAuth, async (req, res) => {
   try {
@@ -59,7 +86,7 @@ router.put("/services/:id", requireAuth, async (req, res) => {
         icon,
         details,
         link,
-        order: order ? Number(order) : 0,
+        order: order === undefined || order === null || order === "" ? 0 : Number(order),
         updatedAt: new Date().toISOString(),
       })
       .where(eq(services.id, Number(id)))
@@ -74,32 +101,6 @@ router.put("/services/:id", requireAuth, async (req, res) => {
   } catch (error) {
     req.log.error(error, "Update service error");
     res.status(500).json({ error: "Internal server error updating service" });
-  }
-});
-
-// Reorder services
-router.put("/services/reorder", requireAuth, async (req, res) => {
-  try {
-    const { items } = req.body; // Array of { id: number, order: number }
-
-    if (!items || !Array.isArray(items)) {
-      res.status(400).json({ error: "Items array is required" });
-      return;
-    }
-
-    await db.transaction(async (tx) => {
-      for (const item of items) {
-        await tx
-          .update(services)
-          .set({ order: item.order, updatedAt: new Date().toISOString() })
-          .where(eq(services.id, item.id));
-      }
-    });
-
-    res.json({ success: true, message: "Services reordered successfully" });
-  } catch (error) {
-    req.log.error(error, "Reorder services error");
-    res.status(500).json({ error: "Internal server error reordering services" });
   }
 });
 

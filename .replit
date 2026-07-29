@@ -1,8 +1,24 @@
 modules = ["nodejs-24"]
 
 [deployment]
-router = "application"
-deploymentTarget = "autoscale"
+# Reserved VM, not Autoscale.
+#
+# This app keeps its SQLite database (sustainpro.db) and all uploaded files
+# (./uploads) on the local filesystem. Autoscale runs multiple instances, and each
+# one loads the whole database into memory via sql.js and rewrites the entire file
+# every 10 seconds - so concurrent instances silently overwrite each other's writes,
+# losing admin edits and uploaded photos. A Reserved VM is a single always-on
+# instance, which is the only shape this storage design is safe in.
+deploymentTarget = "vm"
+
+# One server serves everything: the API, the admin SPA, and the public website.
+# `pnpm run build` typechecks, then builds api-server/dist, admin/dist and
+# sustainpro/dist/public - the last two are what the API server statically serves.
+build = ["pnpm", "run", "build"]
+
+# index.ts requires PORT and exits if it is missing, so fall back when Replit
+# does not inject one.
+run = ["sh", "-c", "PORT=${PORT:-3000} node artifacts/api-server/dist/index.mjs"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
@@ -19,18 +35,8 @@ expertMode = true
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
 
+# The deployed server listens on PORT (3000 by default) and is served publicly on 80.
+# The previous 8080/8081/8082/21390 entries mapped ports nothing in this project uses.
 [[ports]]
-localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
+localPort = 3000
 externalPort = 80
-
-[[ports]]
-localPort = 8082
-externalPort = 3001
-
-[[ports]]
-localPort = 21390
-externalPort = 3000

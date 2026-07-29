@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "SustainPro Process Solutions"
+version = "1.0.0"
+id = "artifacts/sustainpro"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21390
+
+[services.development]
+run = "pnpm --filter @workspace/sustainpro run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sustainpro", "run", "build" ]
+publicDir = "artifacts/sustainpro/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21390"
+BASE_PATH = "/"

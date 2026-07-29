@@ -1,0 +1,48 @@
+import { Router } from "express";
+import authRouter from "./auth";
+import dashboardRouter from "./dashboard";
+import homepageRouter from "./homepage";
+import aboutRouter from "./about";
+import servicesRouter from "./services";
+import industriesRouter from "./industries";
+import researchRouter from "./research";
+import softwareRouter from "./software";
+import trainingRouter from "./training";
+import eventsRouter from "./events";
+import noticesRouter from "./notices";
+import messagesRouter from "./messages";
+import mediaRouter from "./media";
+import settingsRouter from "./settings";
+import heroSlidesRouter from "./heroSlides";
+import pageBannersRouter from "./pageBanners";
+import navItemsRouter from "./navItems";
+import pagesRouter from "./pages";
+import galleryRouter from "./gallery";
+import sirProfileRouter from "./sirProfile";
+import careersRouter from "./careers";
+
+const router = Router();
+
+router.use(authRouter);
+router.use(dashboardRouter);
+router.use(homepageRouter);
+router.use(aboutRouter);
+router.use(servicesRouter);
+router.use(industriesRouter);
+router.use(researchRouter);
+router.use(softwareRouter);
+router.use(trainingRouter);
+router.use(eventsRouter);
+router.use(noticesRouter);
+router.use(messagesRouter);
+router.use(mediaRouter);
+router.use(settingsRouter);
+router.use(heroSlidesRouter);
+router.use(pageBannersRouter);
+router.use(navItemsRouter);
+router.use(pagesRouter);
+router.use(galleryRouter);
+router.use(sirProfileRouter);
+router.use(careersRouter);
+
+export default router;
